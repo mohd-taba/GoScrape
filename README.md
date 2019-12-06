@@ -14,6 +14,9 @@ It supports concurrency, proxy, user-agent, and cookies.
 		UserAgent : "GoScrape",
     		ProxyURL : "http://127.0.0.1:8118"
 		Jar : MyCookieJar,
+		CallbackF: func (resp *http.Response){
+		resp.Body.Close() //VITAL
+		}
 	}
   
   //Run Scraper
