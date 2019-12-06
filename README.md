@@ -1,5 +1,6 @@
+# Description
 GoScrape is a simple web scraper written in Go.
-It includes proxy support, user-agent, and cookies.
+It supports concurrency, proxy, user-agent, and cookies.
 
 # Installation
 `go get github.com/mohd-taba/GoScrape`
@@ -19,7 +20,7 @@ It includes proxy support, user-agent, and cookies.
   scraper.Scrape(opts)
   
   //That's it!
-  ```
+ ```
   
   ## Cookiejar?
   
@@ -43,5 +44,5 @@ It includes proxy support, user-agent, and cookies.
     URLSlice : []string {"https://cookiesite.com"},
     }
     scraper.Scrape(opts)
-    ```
+```
   
