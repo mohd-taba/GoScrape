@@ -34,20 +34,24 @@ It supports concurrency, proxy, user-agent, and cookies.
   options := cookiejar.Options{
         PublicSuffixList: publicsuffix.List,
     }
+    
     jar, err := cookiejar.New(&options)
     if err != nil {
         log.Fatal(err)
     }
+    
     // Do stuff using the cookie jar (e.g, sign-in)
     client := http.Client{Jar: jar}
     resp, err := client.Get("https://cookiesite.com/login.php?=username&password")
     if err != nil {
         log.Fatal(err)
     }
+    
     //Create options with jar
     opts = scraper.Options{
     URLSlice : []string {"https://cookiesite.com"},
     }
+    
     //Pass options to scraper
     scraper.Scrape(opts)
 ```
