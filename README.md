@@ -7,6 +7,8 @@ It supports concurrency, proxy, user-agent, and cookies.
 
 # Usage
 
+WARNING: In case you pass a callback function, don't forget to resp.Body.Close()
+
 ```golang
 // Define your Options
 	opts := scraper.Options{
