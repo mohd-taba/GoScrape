@@ -43,6 +43,7 @@ It supports concurrency, proxy, user-agent, and cookies.
     opts = scraper.Options{
     URLSlice : []string {"https://cookiesite.com"},
     }
+    //Pass options to scraper
     scraper.Scrape(opts)
 ```
   
