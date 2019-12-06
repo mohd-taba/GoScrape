@@ -38,7 +38,7 @@ It supports concurrency, proxy, user-agent, and cookies.
     if err != nil {
         log.Fatal(err)
     }
-    // Do stuff with cookie jar
+    // Do stuff using the cookie jar (e.g, sign-in)
     client := http.Client{Jar: jar}
     resp, err := client.Get("https://cookiesite.com/login.php?=username&password")
     if err != nil {
