@@ -6,22 +6,25 @@ It includes proxy support, user-agent, and cookies.
 
 # Usage
 
-`// Define your Options
+```golang
+// Define your Options
 	opts := scraper.Options{
 		URLSlice : []string {"https://duckduckgo.com/", "https://example.com/", "http://site1.com/"},
 		UserAgent : "GoScrape",
-    ProxyURL : "http://127.0.0.1:8118"
+    		ProxyURL : "http://127.0.0.1:8118"
 		Jar : MyCookieJar,
 	}
   
   //Run Scraper
   scraper.Scrape(opts)
   
-  //That's it!`
+  //That's it!
+  ```
   
   ## Cookiejar?
   
-  `// Create cookie jar:
+  ```golang
+  // Create cookie jar:
   options := cookiejar.Options{
         PublicSuffixList: publicsuffix.List,
     }
@@ -40,5 +43,5 @@ It includes proxy support, user-agent, and cookies.
     URLSlice : []string {"https://cookiesite.com"},
     }
     scraper.Scrape(opts)
-    `
+    ```
   
