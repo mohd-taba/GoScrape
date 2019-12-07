@@ -58,7 +58,11 @@ It supports concurrency, proxy, user-agent, and cookies.
   
 # Credits
 This module was inspired by:
+
 https://github.com/juliensalinas/go_concurrent_scraping/tree/master/src/go_concurrent_scraper
+
 https://www.admfactory.com/how-to-setup-a-proxy-for-http-client-in-golang/
+
 https://github.com/geziyor/geziyor
+
 https://github.com/headzoo/surf
