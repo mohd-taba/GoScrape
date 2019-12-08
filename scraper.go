@@ -9,6 +9,7 @@ Fetch urls concurrently using goroutines.
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -27,10 +28,12 @@ type Options struct {
 	//Callback ... (Optional) I know I just met you, but call me maybe
 	CallbackF func(resp *http.Response)
 }
+
 // Default Values.
 var (
 	userAgent = "GoScrape"
 )
+
 // fetchURL opens a url with GET method and sets a custom user agent.
 // If url cannot be opened, then log it to a dedicated channel.
 func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls chan string, chIsFinished chan *http.Response) {
@@ -45,7 +48,14 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 		}
 	}
 
-	req, _ := http.NewRequest("GET", uri, nil)
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		log.Printf("Possibly faulty url, make sure of the schema. " + uri)
+		chFailedUrls <- uri
+		b := &http.Response{}
+		chIsFinished <- b
+		return
+	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := client.Do(req)
 
@@ -68,13 +78,13 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 // Scrape ... Takes scraper.Options as argument, and scrapes provided urls accordingly
 func Scrape(opts Options) {
 	// Process options
-	if len(opts.URLSlice) == 0{
+	if len(opts.URLSlice) == 0 {
 		panic("Empty URL list passed")
 	}
 	if opts.UserAgent != "" {
 		userAgent = opts.UserAgent
 	}
-	if opts.CallbackF == nil{
+	if opts.CallbackF == nil {
 		opts.CallbackF = func(resp *http.Response) {
 
 		}
@@ -84,7 +94,6 @@ func Scrape(opts Options) {
 	// and 1 to inform url fetching is done:
 	chFailedUrls := make(chan string)
 	chIsFinished := make(chan *http.Response)
-
 
 	// Open all urls concurrently using the 'go' keyword:
 	for _, uri := range opts.URLSlice {
@@ -100,7 +109,6 @@ func Scrape(opts Options) {
 			failedUrls = append(failedUrls, uri)
 		case resp := <-chIsFinished:
 			opts.CallbackF(resp)
-			defer resp.Body.Close()
 			i++
 		}
 	}
