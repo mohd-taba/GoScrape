@@ -7,8 +7,6 @@ It supports concurrency, proxy, user-agent, and cookies.
 
 # Usage
 
-### WARNING: In case you pass a callback function, don't forget to resp.Body.Close()
-
 ```golang
 // Define your Options
 	opts := scraper.Options{
@@ -16,8 +14,7 @@ It supports concurrency, proxy, user-agent, and cookies.
 		UserAgent : "GoScrape",
     		ProxyURL : "http://127.0.0.1:8118"
 		Jar : MyCookieJar,
-		CallbackF: func (resp *http.Response){
-		resp.Body.Close() //VITAL
+		CallbackF: func (resp *http.Response){ // Manipulate response } // Response body will be closed.
 		}
 	}
   
