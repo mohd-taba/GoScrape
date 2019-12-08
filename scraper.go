@@ -2,7 +2,6 @@ package scraper
 
 /*
 Open a series of urls.
-
 Check status code for each url and store urls I could not
 open in a dedicated array.
 Fetch urls concurrently using goroutines.
@@ -15,9 +14,9 @@ import (
 	"net/url"
 )
 
-// Options ... Configuration of the creaed scrape
+// Options ... Configuration of the created scrape
 type Options struct {
-	// URLSlice ... (Reqired) A list of strings of the urls of type []string
+	// URLSlice ... (Required) A list of strings of the urls of type []string
 	URLSlice []string
 	// ProxyURL ... (Optional) (e.g. "http://localhost:8118")
 	ProxyURL string
@@ -28,18 +27,14 @@ type Options struct {
 	//Callback ... (Optional) I know I just met you, but call me maybe
 	CallbackF func(resp *http.Response)
 }
-
 // Default Values.
 var (
-	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
+	userAgent = "GoScrape"
 )
-
-// -------------------------------------
-
 // fetchURL opens a url with GET method and sets a custom user agent.
 // If url cannot be opened, then log it to a dedicated channel.
 func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls chan string, chIsFinished chan *http.Response) {
-	//preparing proxy
+	//Preparing proxy
 	var client = &http.Client{}
 	fmt.Println(cookieJar)
 	if proxy != "" {
@@ -65,6 +60,7 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 	// If url could not be opened, we inform the channel chFailedUrls:
 	if err != nil || resp.StatusCode != 200 {
 		chFailedUrls <- uri
+		resp.Body.Close()
 		return
 	}
 
@@ -81,9 +77,9 @@ func Scrape(opts Options) {
 	}
 	if opts.CallbackF == nil{
 		opts.CallbackF = func(resp *http.Response) {
-			resp.Body.Close()
-			fmt.Println("Closed Body!!")
+
 		}
+
 	}
 	// Create 2 channels, 1 to track urls we could not open
 	// and 1 to inform url fetching is done:
@@ -105,6 +101,8 @@ func Scrape(opts Options) {
 			failedUrls = append(failedUrls, uri)
 		case resp := <-chIsFinished:
 			opts.CallbackF(resp)
+			defer resp.Body.Close()
+			i++
 		}
 	}
 
