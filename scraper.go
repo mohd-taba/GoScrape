@@ -1,13 +1,7 @@
 package scraper
 
-/*
-Open a series of urls.
-Check status code for each url and store urls I could not
-open in a dedicated array.
-Fetch urls concurrently using goroutines.
-*/
-
-import (
+import(
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,8 +9,9 @@ import (
 	"net/url"
 )
 
-// Options ... Configuration of the created scrape
-type Options struct {
+// STRUCT DEFINITIONS
+// Configs defined to pass to Init()
+type Config struct {
 	// URLSlice ... (Required) A list of strings of the urls of type []string
 	URLSlice []string
 	// ProxyURL ... (Optional) (e.g. "http://localhost:8118")
@@ -26,16 +21,21 @@ type Options struct {
 	// Jar ... (Optional) Pass your own cookiejar after signing in for example
 	Jar *cookiejar.Jar
 	//Callback ... (Optional) I know I just met you, but call me maybe
-	CallbackF func(resp *http.Response)
+	CallbackF func(resp *http.Response) interface{}
 }
 
-// Default Values.
-var (
-	userAgent = "GoScrape"
-)
+type scraper struct {
+	opts Config
+	results []interface{}
+}
 
-// fetchURL opens a url with GET method and sets a custom user agent.
-// If url cannot be opened, then log it to a dedicated channel.
+type ret struct {
+	uri string
+	result string
+}
+
+var userAgent string = "GoScrape"
+// Unexported function looped through to grab urls
 func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls chan string, chIsFinished chan *http.Response) {
 	//Preparing proxy
 	var client = &http.Client{}
@@ -75,45 +75,63 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 
 }
 
-// Scrape ... Takes scraper.Options as argument, and scrapes provided urls accordingly
-func Scrape(opts Options) {
-	// Process options
-	if len(opts.URLSlice) == 0 {
-		panic("Empty URL list passed")
+// Accepts Config instance, processes it, and returns scraper instance (Doesn't matter if its a copy)
+func Init(cfg Config) (craper scraper) {
+	// Stop execution if there are no URLs received
+	if len(cfg.URLSlice) == 0 {
+		panic("Zero URLs received")
 	}
-	if opts.UserAgent != "" {
-		userAgent = opts.UserAgent
+	// If no User-Agent is specified in cfg assign our own
+	if cfg.UserAgent != ""{
+		userAgent = cfg.UserAgent
 	}
-	if opts.CallbackF == nil {
-		opts.CallbackF = func(resp *http.Response) {
-
+	// Create a Callback Function in case none were specified.
+	if cfg.CallbackF == nil {
+		cfg.CallbackF = func(resp *http.Response) interface{} {
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(resp.Body)
+			newStr := buf.String()
+			link := resp.Request.URL.String()
+			return ret{
+				uri: link,
+				result: newStr,
+			}
 		}
-
+		}
+	craper = scraper{
+		opts: cfg,
 	}
-	// Create 2 channels, 1 to track urls we could not open
-	// and 1 to inform url fetching is done:
+	return
+}
+
+func (scraper scraper) Results() []interface{} {
+	return scraper.results
+}
+// Starts scraper to loop through supplied URLs using supplied options
+func (scraper *scraper) Start () {
 	chFailedUrls := make(chan string)
 	chIsFinished := make(chan *http.Response)
-
-	// Open all urls concurrently using the 'go' keyword:
-	for _, uri := range opts.URLSlice {
-		go fetchURL(uri, opts.ProxyURL, opts.Jar, chFailedUrls, chIsFinished)
+	for _, uri := range scraper.opts.URLSlice {
+		go fetchURL(uri, scraper.opts.ProxyURL, scraper.opts.Jar, chFailedUrls, chIsFinished)
 	}
 
 	// Receive messages from every concurrent goroutine. If
 	// an url fails, we log it to failedUrls array:
 	failedUrls := make([]string, 0)
-	for i := 0; i < len(opts.URLSlice); {
+	for i := 0; i < len(scraper.opts.URLSlice); {
 		select {
 		case uri := <-chFailedUrls:
 			failedUrls = append(failedUrls, uri)
 		case resp := <-chIsFinished:
-			opts.CallbackF(resp)
+			if resp.Body != nil {
+				scraper.results = append(scraper.results, scraper.opts.CallbackF(resp))
+				resp.Body.Close()
+
+			}
 			i++
 		}
 	}
 
 	// Print all urls we could not open:
 	fmt.Println("Could not fetch these urls: ", failedUrls)
-
 }
