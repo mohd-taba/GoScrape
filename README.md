@@ -2,7 +2,7 @@
 GoScrape is a simple web scraper written in Go. It supports concurrency, proxy, user-agent, and cookies.
 
 # Installation
-go get github.com/mohd-taba/GoScrape
+```go get github.com/mohd-taba/GoScrape```
 
 # Usage
 ```golang
