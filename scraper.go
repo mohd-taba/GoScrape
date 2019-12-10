@@ -1,5 +1,4 @@
 package scraper
-
 import(
 	"bytes"
 	"fmt"
@@ -8,7 +7,6 @@ import(
 	"net/http/cookiejar"
 	"net/url"
 )
-
 // STRUCT DEFINITIONS
 // Configs defined to pass to Init()
 type Config struct {
@@ -23,17 +21,14 @@ type Config struct {
 	//Callback ... (Optional) I know I just met you, but call me maybe
 	CallbackF func(resp *http.Response) interface{}
 }
-
 type scraper struct {
-	opts Config
+	opts *Config
 	results []interface{}
 }
-
 type ret struct {
 	uri string
 	result string
 }
-
 var userAgent string = "GoScrape"
 // Unexported function looped through to grab urls
 func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls chan string, chIsFinished chan *http.Response) {
@@ -47,7 +42,6 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 			panic("Proxy Error")
 		}
 	}
-
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		log.Printf("Possibly faulty url, make sure of the schema. " + uri)
@@ -58,14 +52,12 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := client.Do(req)
-
 	// Inform the channel chIsFinished that url fetching is done (no
 	// matter whether successful or not). Defer triggers only once
 	// we leave fetchURL():
 	defer func() {
 		chIsFinished <- resp
 	}()
-
 	// If url could not be opened, we inform the channel chFailedUrls:
 	if err != nil || resp.StatusCode != 200 {
 		chFailedUrls <- uri
@@ -74,9 +66,8 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 	}
 
 }
-
 // Accepts Config instance, processes it, and returns scraper instance (Doesn't matter if its a copy)
-func Init(cfg Config) (craper scraper) {
+func Init(cfg *Config) (craper scraper) {
 	// Stop execution if there are no URLs received
 	if len(cfg.URLSlice) == 0 {
 		panic("Zero URLs received")
@@ -103,7 +94,6 @@ func Init(cfg Config) (craper scraper) {
 	}
 	return
 }
-
 func (scraper scraper) Results() []interface{} {
 	return scraper.results
 }
@@ -114,7 +104,6 @@ func (scraper *scraper) Start () {
 	for _, uri := range scraper.opts.URLSlice {
 		go fetchURL(uri, scraper.opts.ProxyURL, scraper.opts.Jar, chFailedUrls, chIsFinished)
 	}
-
 	// Receive messages from every concurrent goroutine. If
 	// an url fails, we log it to failedUrls array:
 	failedUrls := make([]string, 0)
@@ -131,7 +120,6 @@ func (scraper *scraper) Start () {
 			i++
 		}
 	}
-
 	// Print all urls we could not open:
 	fmt.Println("Could not fetch these urls: ", failedUrls)
 }
