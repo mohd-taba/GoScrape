@@ -33,7 +33,7 @@ var userAgent string = "GoScrape"
 // Unexported function looped through to grab urls
 func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls chan string, chIsFinished chan *http.Response) {
 	//Preparing proxy
-	var client = &http.Client{}
+	var client = &http.Client{Jar: cookieJar}
 	if proxy != "" {
 		proxyURL, err := url.Parse(proxy)
 		transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
