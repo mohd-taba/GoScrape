@@ -9,7 +9,8 @@ GoScrape is a simple web scraper written in Go. It supports concurrency, proxy, 
 import "github.com/mohd-taba/GoScrape"
 
 // Define your configurations
-	cfg := scraper.Config{
+// Either grab the pointer here, or define without "&" and pass it to init with "&", (e.g, scraper.Init(&cfg)) not both.
+	cfg := &scraper.Config{
 	URLSlice:  []string {"http://duckduckgo.com", "http://api.myip.com"},
 	ProxyURL:  "http://127.0.0.1:8118",
 	UserAgent: "TESTIS",
@@ -17,6 +18,7 @@ import "github.com/mohd-taba/GoScrape"
 }
 
 // Create your scraper
+// Make sure you pass a pointer of your configuration to assure proper cookie management
 scraperInstance := scraper.Init(cfg)
 // Start scraping
 scraperInstance.Start()
