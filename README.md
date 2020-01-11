@@ -41,7 +41,7 @@ func cbf(r *http.Response) interface{}{
 cfg := scraper.Config{
 	URLSlice:  []string {"http://duckduckgo.com", "http://api.myip.com"},
 	ProxyURL:  "http://127.0.0.1:8118",
-	UserAgent: "TESTIS",
+	UserAgent: "GoScrapeV1.0",
 	CallbackF: cbf,
 	Jar:       myJar,
 }
