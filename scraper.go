@@ -61,7 +61,9 @@ func fetchURL(uri string, proxy string, cookieJar *cookiejar.Jar, chFailedUrls c
 	// If url could not be opened, we inform the channel chFailedUrls:
 	if err != nil || resp.StatusCode != 200 {
 		chFailedUrls <- uri
+		if resp != nil {
 		resp.Body.Close()
+                }
 		return
 	}
 
